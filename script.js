@@ -1,5 +1,5 @@
 // Cole aqui a URL /exec do NOVO Apps Script deste aplicativo.
-const WEB_APP_URL = 'COLE_AQUI_A_URL_DO_NOVO_APPS_SCRIPT';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzji3OuXJVaVblyOO7oyomZpBkggzsYWMTghdKMefstn7vsG7umNrIpJNxTjcv5MOkD/exec';
 const SESSION_KEY = 'conferencia_vasilhames_session_v1';
 
 let tokenSessao = '';
