@@ -227,21 +227,53 @@ function renderDashboard(){
   window.__dashAtual=arr;
 }
 function renderRankingMotoristas(arr){
-  const grupos=new Map();
-  arr.filter(r=>r.status==='DIVERGENTE' && String(r.motorista||'').trim()).forEach(r=>{
-    const nome=String(r.motorista||'').trim();
+  // O valor financeiro dos rankings considera somente faltas (divergências negativas).
+  // A quantidade de mapas continua considerando qualquer mapa com status DIVERGENTE.
+  const valorNegativoDoMapa = r => {
+    if(Number.isFinite(Number(r.valorDivergenciaNegativa))) return Number(r.valorDivergenciaNegativa || 0);
+    return Object.values(r.detalhes || {}).reduce((s,d)=>s+(Number(d.diferenca)<0?Number(d.valor||0):0),0);
+  };
+
+  const motoristas = new Map();
+  const ajudantes = new Map();
+
+  const acumular = (grupos, nome, r) => {
+    nome=String(nome||'').trim();
+    if(!nome) return;
     const chave=nome.toLocaleLowerCase('pt-BR');
-    if(!grupos.has(chave)) grupos.set(chave,{motorista:nome,mapas:new Set(),valor:0});
+    if(!grupos.has(chave)) grupos.set(chave,{nome,mapas:new Set(),valor:0});
     const g=grupos.get(chave);
     g.mapas.add(`${r.data}|${r.mapa}`);
-    g.valor+=Number(r.valorDivergencia||0);
+    g.valor += valorNegativoDoMapa(r);
+  };
+
+  arr.filter(r=>r.status==='DIVERGENTE').forEach(r=>{
+    acumular(motoristas,r.motorista,r);
+
+    // Um mesmo ajudante é agrupado independentemente de ter sido Ajudante 1 ou Ajudante 2.
+    // Se por erro o mesmo nome estiver nas duas posições do mesmo mapa, contabiliza apenas uma vez.
+    const nomesAjudantes=[r.ajudante1,r.ajudante2]
+      .map(v=>String(v||'').trim())
+      .filter(Boolean);
+    const unicos=new Map();
+    nomesAjudantes.forEach(nome=>unicos.set(nome.toLocaleLowerCase('pt-BR'),nome));
+    unicos.forEach(nome=>acumular(ajudantes,nome,r));
   });
-  const base=[...grupos.values()].map(g=>({motorista:g.motorista,mapas:g.mapas.size,valor:g.valor}));
-  const porValor=[...base].sort((a,b)=>b.valor-a.valor||b.mapas-a.mapas||a.motorista.localeCompare(b.motorista,'pt-BR'));
-  const porMapas=[...base].sort((a,b)=>b.mapas-a.mapas||b.valor-a.valor||a.motorista.localeCompare(b.motorista,'pt-BR'));
-  const linha=(r,i)=>`<tr><td><span class="rank-pos">${i+1}</span></td><td><strong>${esc(r.motorista)}</strong></td><td>${r.mapas}</td><td class="ranking-money">${brl(r.valor)}</td></tr>`;
-  $('tbodyRankingValor').innerHTML=porValor.length?porValor.map(linha).join(''):`<tr><td colspan="4" class="empty-row">Nenhum motorista com divergência no filtro.</td></tr>`;
-  $('tbodyRankingMapas').innerHTML=porMapas.length?porMapas.map(linha).join(''):`<tr><td colspan="4" class="empty-row">Nenhum motorista com divergência no filtro.</td></tr>`;
+
+  const preparar = grupos => [...grupos.values()]
+    .map(g=>({nome:g.nome,mapas:g.mapas.size,valor:g.valor}))
+    .sort((a,b)=>b.valor-a.valor||b.mapas-a.mapas||a.nome.localeCompare(b.nome,'pt-BR'));
+
+  const rankingMotoristas=preparar(motoristas);
+  const rankingAjudantes=preparar(ajudantes);
+  const linha=(r,i)=>`<tr><td><span class="rank-pos">${i+1}</span></td><td><strong>${esc(r.nome)}</strong></td><td>${r.mapas}</td><td class="ranking-money">${brl(r.valor)}</td></tr>`;
+
+  $('tbodyRankingValor').innerHTML=rankingMotoristas.length
+    ?rankingMotoristas.map(linha).join('')
+    :`<tr><td colspan="4" class="empty-row">Nenhum motorista com divergência no filtro.</td></tr>`;
+  $('tbodyRankingMapas').innerHTML=rankingAjudantes.length
+    ?rankingAjudantes.map(linha).join('')
+    :`<tr><td colspan="4" class="empty-row">Nenhum ajudante com divergência no filtro.</td></tr>`;
 }
 function statusInfo(s){
   if(s==='OK') return {label:'SEM DIFERENÇA',cls:'ok'};
