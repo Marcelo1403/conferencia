@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#073b6f">
+  <title>Conferência de Vasilhames</title>
+  <link rel="stylesheet" href="style.css?v=1.0">
+</head>
+<body>
+  <section id="loginScreen" class="login-screen">
+    <div class="login-orb orb-a"></div><div class="login-orb orb-b"></div>
+    <div class="login-shell">
+      <div class="login-side">
+        <div class="brand-box">CV</div>
+        <div class="login-copy">
+          <span>ARMAZÉM • CONTROLE DE RETORNO</span>
+          <h1>Conferência de<br>Vasilhames</h1>
+          <p>Registre o retorno dos mapas e acompanhe divergências entre o físico e a base operacional.</p>
+        </div>
+        <div class="login-features">
+          <div><b>✓</b> Registro rápido por mapa</div>
+          <div><b>✓</b> Histórico individual do conferente</div>
+          <div><b>✓</b> Comparativo e impacto financeiro</div>
+        </div>
+      </div>
+      <div class="login-form-panel">
+        <div class="mobile-brand"><div class="brand-box mini">CV</div><strong>Conferência de Vasilhames</strong></div>
+        <span class="eyebrow">ACESSO AO SISTEMA</span>
+        <h2>Bem-vindo</h2>
+        <p class="sub">Informe seu usuário e senha para continuar.</p>
+        <div id="backendStatus" class="backend-status checking"><i></i><span>Verificando conexão...</span></div>
+        <form id="loginForm" autocomplete="off">
+          <label>Usuário</label>
+          <input id="loginUsuario" type="text" autocomplete="username" placeholder="Digite seu usuário" required>
+          <label>Senha</label>
+          <div class="password-wrap">
+            <input id="loginSenha" type="password" autocomplete="current-password" placeholder="Digite sua senha" required>
+            <button id="toggleSenha" type="button">Mostrar</button>
+          </div>
+          <button id="btnLogin" class="btn primary login-btn" type="submit">Entrar <span>→</span></button>
+          <div id="loginMessage" class="login-message"></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <div id="app" class="app oculto">
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-brand"><div class="brand-box small">CV</div><div><strong>Conferência</strong><span>Vasilhames</span></div></div>
+      <div class="sidebar-user-mobile"><strong id="mobileUserName">—</strong><span id="mobileUserProfile">—</span></div>
+      <nav>
+        <button class="nav-item" data-view="conferencia"><span class="nav-icon">✓</span><span>Conferência de vasilhames</span></button>
+        <button class="nav-item conferente-only" data-view="minhas"><span class="nav-icon">◷</span><span>Minhas conferências</span></button>
+        <button class="nav-item admin-only" data-view="historico"><span class="nav-icon">≡</span><span>Histórico de conferências</span></button>
+        <button class="nav-item admin-only" data-view="dashboard"><span class="nav-icon">▦</span><span>Dashboard comparativo</span></button>
+        <button class="nav-item admin-only" data-view="usuarios"><span class="nav-icon">♙</span><span>Usuários</span></button>
+      </nav>
+      <button id="sidebarLogout" class="sidebar-logout">Sair</button>
+    </aside>
+    <div id="overlay" class="overlay"></div>
+
+    <header class="topbar">
+      <button id="menuBtn" class="menu-btn" aria-label="Menu">☰</button>
+      <div class="topbar-title"><strong id="topTitle">Conferência de vasilhames</strong><span id="topSubtitle">Registro de retorno por mapa</span></div>
+      <div class="user-area">
+        <div id="userAvatar" class="user-avatar">U</div>
+        <div class="user-info"><strong id="userName">—</strong><span id="userProfile">—</span></div>
+        <button id="btnLogout" class="logout-btn">Sair</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <section id="view-conferencia" class="view">
+        <div class="page-head"><div><div class="breadcrumb">Armazém <span>/</span> Conferência</div><h1>Conferência de vasilhames</h1><p>Informe as quantidades físicas retornadas no mapa.</p></div><div class="page-chip">CADASTRO</div></div>
+        <div class="card">
+          <div class="notice"><div class="notice-icon">i</div><div>A data e a hora são registradas automaticamente pelo servidor. O conferente será sempre o usuário conectado.</div></div>
+          <div class="live-info">
+            <div><span>CONFERENTE</span><strong id="formConferente">—</strong></div>
+            <div><span>DATA/HORA</span><strong id="formAgora">—</strong></div>
+          </div>
+          <form id="formConferencia">
+            <div class="section-title">Identificação do mapa</div>
+            <div class="field mapa-field"><label>Mapa *</label><input id="campoMapa" inputmode="numeric" pattern="[0-9]*" placeholder="Digite apenas números" maxlength="12" required></div>
+            <div class="section-title">Vasilhames retornados</div>
+            <div class="qty-grid">
+              <div class="qty-card"><div class="qty-label"><span class="dot"></span><strong>Garrafeiras de 300ml</strong><small>R$ 69,50 / garrafeira</small></div><input id="g300" type="number" min="0" step="1" value="0" required></div>
+              <div class="qty-card"><div class="qty-label"><span class="dot"></span><strong>600ml Verde</strong><small>R$ 83,00 / garrafeira</small></div><input id="g600v" type="number" min="0" step="1" value="0" required></div>
+              <div class="qty-card"><div class="qty-label"><span class="dot"></span><strong>600ml Marrom</strong><small>R$ 71,00 / garrafeira</small></div><input id="g600m" type="number" min="0" step="1" value="0" required></div>
+              <div class="qty-card"><div class="qty-label"><span class="dot"></span><strong>Garrafeiras de Litrão</strong><small>R$ 59,00 / garrafeira</small></div><input id="glitrao" type="number" min="0" step="1" value="0" required></div>
+              <div class="qty-card"><div class="qty-label"><span class="dot"></span><strong>Barris de Chopp 30L</strong><small>R$ 400,00 / barril</small></div><input id="b30" type="number" min="0" step="1" value="0" required></div>
+              <div class="qty-card"><div class="qty-label"><span class="dot"></span><strong>Barris de Chopp 50L</strong><small>R$ 400,00 / barril</small></div><input id="b50" type="number" min="0" step="1" value="0" required></div>
+            </div>
+            <div class="form-actions"><button id="btnLimpar" type="button" class="btn secondary">Limpar</button><button id="btnSalvarConferencia" type="submit" class="btn primary">Registrar conferência</button></div>
+          </form>
+        </div>
+      </section>
+
+      <section id="view-minhas" class="view">
+        <div class="page-head"><div><div class="breadcrumb">Armazém <span>/</span> Minhas conferências</div><h1>Minhas conferências</h1><p>Seu histórico individual de registros.</p></div><div class="page-chip">MEU HISTÓRICO</div></div>
+        <div class="card">
+          <div class="filters grid-3"><div class="field"><label>Pesquisar mapa</label><input id="filtroMinhasMapa" placeholder="Mapa"></div><div class="field"><label>Data</label><input id="filtroMinhasData" type="date"></div><div class="align-end"><button id="btnAtualizarMinhas" class="btn secondary">Atualizar</button></div></div>
+          <div class="table-wrap"><table><thead><tr><th>Data / hora</th><th>Mapa</th><th>300ml</th><th>600 verde</th><th>600 marrom</th><th>Litrão</th><th>Chopp 30L</th><th>Chopp 50L</th></tr></thead><tbody id="tbodyMinhas"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="view-historico" class="view">
+        <div class="page-head"><div><div class="breadcrumb">Admin <span>/</span> Histórico</div><h1>Histórico de conferências</h1><p>Todas as conferências registradas pelos usuários.</p></div><div class="page-chip admin">ADMIN</div></div>
+        <div class="card">
+          <div class="filters grid-5"><div class="field"><label>Mapa</label><input id="histMapa" placeholder="Todos"></div><div class="field"><label>Conferente</label><input id="histConferente" placeholder="Todos"></div><div class="field"><label>De</label><input id="histDe" type="date"></div><div class="field"><label>Até</label><input id="histAte" type="date"></div><div class="align-end actions-row"><button id="btnAtualizarHistorico" class="btn secondary">Atualizar</button><button id="btnBaixarHistorico" class="btn primary">Baixar CSV</button></div></div>
+          <div class="table-wrap"><table class="history-table"><thead><tr><th>Data</th><th>Hora</th><th>Conferente</th><th>Mapa</th><th>Cidade</th><th>Motorista</th><th>Ajudante 1</th><th>Ajudante 2</th><th>300ml</th><th>600 Verde</th><th>600 Marrom</th><th>Litrão</th><th>Chopp 30L</th><th>Chopp 50L</th></tr></thead><tbody id="tbodyHistorico"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="view-dashboard" class="view">
+        <div class="page-head"><div><div class="breadcrumb">Admin <span>/</span> Dashboard</div><h1>Dashboard comparativo</h1><p>Comparação entre a aba MAPAS e a conferência física.</p></div><div class="page-chip admin">COMPARATIVO</div></div>
+        <div class="card filter-card">
+          <div class="filters grid-4"><div class="field"><label>Data</label><input id="dashData" type="date"></div><div class="field"><label>Mapa</label><input id="dashMapa" placeholder="Todos"></div><div class="field"><label>Cidade</label><input id="dashCidade" placeholder="Todas"></div><div class="align-end"><button id="btnAtualizarDashboard" class="btn primary">Atualizar dashboard</button></div></div>
+        </div>
+        <div class="kpi-grid">
+          <div class="kpi"><span>Mapas planejados</span><strong id="kpiPlanejados">0</strong><small>na base MAPAS</small></div>
+          <div class="kpi"><span>Conferidos</span><strong id="kpiConferidos">0</strong><small>com registro físico</small></div>
+          <div class="kpi"><span>Sem conferência</span><strong id="kpiPendentes">0</strong><small>aguardando registro</small></div>
+          <div class="kpi warning"><span>Mapas divergentes</span><strong id="kpiDivergentes">0</strong><small>com diferença física</small></div>
+          <div class="kpi money"><span>Valor da divergência</span><strong id="kpiValor">R$ 0,00</strong><small>valor absoluto das diferenças</small></div>
+        </div>
+        <div class="card">
+          <div class="legend"><span><i class="ok"></i> Sem diferença</span><span><i class="bad"></i> Divergente</span><span><i class="wait"></i> Sem conferência</span><span><i class="info"></i> Mapa fora da base</span></div>
+          <div class="table-wrap"><table class="dash-table"><thead><tr><th>Data / mapa</th><th>Cidade</th><th>Equipe</th><th>Conferente</th><th>Status</th><th>Itens divergentes</th><th>Valor diferença</th><th>Ações</th></tr></thead><tbody id="tbodyDashboard"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="view-usuarios" class="view">
+        <div class="page-head"><div><div class="breadcrumb">Admin <span>/</span> Usuários</div><h1>Gestão de usuários</h1><p>Cadastre administradores e conferentes.</p></div><div class="page-chip admin">ADMIN</div></div>
+        <div class="admin-grid">
+          <div class="card"><div class="section-title">Cadastro de usuário</div><form id="formUsuario"><div class="field"><label>Nome *</label><input id="usuarioNome" required></div><div class="field"><label>Usuário *</label><input id="usuarioLogin" required></div><div class="field"><label>Perfil *</label><select id="usuarioPerfil"><option value="CONFERENTE">Conferente</option><option value="ADMIN">Admin</option></select></div><div class="field"><label>Senha <small>(deixe vazia para manter)</small></label><input id="usuarioSenha" type="password"></div><label class="check"><input id="usuarioAtivo" type="checkbox" checked> Usuário ativo</label><div class="form-actions"><button id="btnNovoUsuario" type="button" class="btn secondary">Novo</button><button class="btn primary" type="submit">Salvar usuário</button></div></form></div>
+          <div class="card"><div class="section-title">Usuários cadastrados</div><div class="table-wrap"><table><thead><tr><th>Nome</th><th>Usuário</th><th>Perfil</th><th>Status</th><th>Ação</th></tr></thead><tbody id="tbodyUsuarios"></tbody></table></div></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modalDetalhe" class="modal"><div class="modal-box large"><div class="modal-head"><div><strong id="modalTitulo">Detalhe do mapa</strong><span id="modalSubtitulo">—</span></div><button id="btnFecharModal" class="icon-btn">×</button></div><div id="modalConteudo" class="modal-body"></div></div></div>
+  <div id="toast" class="toast"></div>
+  <script src="script.js?v=1.0"></script>
+</body>
+</html>
