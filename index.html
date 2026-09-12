@@ -84,12 +84,12 @@
             <div class="field mapa-field"><label>Mapa *</label><input id="campoMapa" inputmode="numeric" pattern="[0-9]*" placeholder="Digite apenas números" maxlength="12" required></div>
             <div class="section-title">Vasilhames retornados</div>
             <div class="qty-grid">
-              <div class="qty-card"><div class="qty-label"><span class="dot"></span><strong>Garrafeiras de 300ml</strong><small>R$ 69,50 / garrafeira</small></div><input id="g300" type="number" min="0" step="1" value="0" required></div>
-              <div class="qty-card"><div class="qty-label"><span class="dot"></span><strong>600ml Verde</strong><small>R$ 83,00 / garrafeira</small></div><input id="g600v" type="number" min="0" step="1" value="0" required></div>
-              <div class="qty-card"><div class="qty-label"><span class="dot"></span><strong>600ml Marrom</strong><small>R$ 71,00 / garrafeira</small></div><input id="g600m" type="number" min="0" step="1" value="0" required></div>
-              <div class="qty-card"><div class="qty-label"><span class="dot"></span><strong>Garrafeiras de Litrão</strong><small>R$ 59,00 / garrafeira</small></div><input id="glitrao" type="number" min="0" step="1" value="0" required></div>
-              <div class="qty-card"><div class="qty-label"><span class="dot"></span><strong>Barris de Chopp 30L</strong><small>R$ 400,00 / barril</small></div><input id="b30" type="number" min="0" step="1" value="0" required></div>
-              <div class="qty-card"><div class="qty-label"><span class="dot"></span><strong>Barris de Chopp 50L</strong><small>R$ 400,00 / barril</small></div><input id="b50" type="number" min="0" step="1" value="0" required></div>
+              <div class="qty-card"><div class="qty-label"><span class="dot"></span><strong>Garrafeiras de 300ml</strong></div><input id="g300" type="number" min="0" step="1" value="0" required></div>
+              <div class="qty-card"><div class="qty-label"><span class="dot"></span><strong>600ml Verde</strong></div><input id="g600v" type="number" min="0" step="1" value="0" required></div>
+              <div class="qty-card"><div class="qty-label"><span class="dot"></span><strong>600ml Marrom</strong></div><input id="g600m" type="number" min="0" step="1" value="0" required></div>
+              <div class="qty-card"><div class="qty-label"><span class="dot"></span><strong>Garrafeiras de Litrão</strong></div><input id="glitrao" type="number" min="0" step="1" value="0" required></div>
+              <div class="qty-card"><div class="qty-label"><span class="dot"></span><strong>Barris de Chopp 30L</strong></div><input id="b30" type="number" min="0" step="1" value="0" required></div>
+              <div class="qty-card"><div class="qty-label"><span class="dot"></span><strong>Barris de Chopp 50L</strong></div><input id="b50" type="number" min="0" step="1" value="0" required></div>
             </div>
             <div class="form-actions"><button id="btnLimpar" type="button" class="btn secondary">Limpar</button><button id="btnSalvarConferencia" type="submit" class="btn primary">Registrar conferência</button></div>
           </form>
@@ -130,14 +130,14 @@
         </div>
         <div class="rankings-grid">
           <div class="card ranking-card">
-            <div class="section-title">Ranking de motoristas por valor divergente</div>
-            <p class="ranking-help">Soma do valor absoluto das divergências dos mapas filtrados.</p>
-            <div class="table-wrap ranking-table-wrap"><table><thead><tr><th>#</th><th>Motorista</th><th>Mapas divergentes</th><th>Valor</th></tr></thead><tbody id="tbodyRankingValor"></tbody></table></div>
+            <div class="section-title">Ranking de motoristas</div>
+            <p class="ranking-help">Valor considera somente divergências negativas. A quantidade considera os mapas divergentes do filtro.</p>
+            <div class="table-wrap ranking-table-wrap"><table><thead><tr><th>#</th><th>Motorista</th><th>Mapas divergentes</th><th>Valor negativo</th></tr></thead><tbody id="tbodyRankingValor"></tbody></table></div>
           </div>
           <div class="card ranking-card">
-            <div class="section-title">Ranking de motoristas por mapas com divergência</div>
-            <p class="ranking-help">Quantidade de mapas divergentes no período/filtro selecionado.</p>
-            <div class="table-wrap ranking-table-wrap"><table><thead><tr><th>#</th><th>Motorista</th><th>Mapas divergentes</th><th>Valor</th></tr></thead><tbody id="tbodyRankingMapas"></tbody></table></div>
+            <div class="section-title">Ranking de ajudantes</div>
+            <p class="ranking-help">Considera o ajudante tanto na posição Ajudante 1 quanto Ajudante 2. Valor somente de divergências negativas.</p>
+            <div class="table-wrap ranking-table-wrap"><table><thead><tr><th>#</th><th>Ajudante</th><th>Mapas divergentes</th><th>Valor negativo</th></tr></thead><tbody id="tbodyRankingMapas"></tbody></table></div>
           </div>
         </div>
       </section>
@@ -154,6 +154,6 @@
 
   <div id="modalDetalhe" class="modal"><div class="modal-box large"><div class="modal-head"><div><strong id="modalTitulo">Detalhe do mapa</strong><span id="modalSubtitulo">—</span></div><button id="btnFecharModal" class="icon-btn">×</button></div><div id="modalConteudo" class="modal-body"></div></div></div>
   <div id="toast" class="toast"></div>
-  <script src="script.js?v=1.2.20260912"></script>
+  <script src="script.js?v=1.3.20260912"></script>
 </body>
 </html>
