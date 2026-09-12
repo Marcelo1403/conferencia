@@ -216,24 +216,29 @@ function renderDashboard(){
   const conferidos=arr.filter(r=>!['SEM_CONFERENCIA'].includes(r.status)).length;
   const pendentes=arr.filter(r=>r.status==='SEM_CONFERENCIA').length;
   const divergentes=arr.filter(r=>r.status==='DIVERGENTE'||r.status==='MAPA_NAO_ENCONTRADO').length;
-  const valor=arr.reduce((s,r)=>s+Number(r.valorDivergencia||0),0);
-  $('kpiPlanejados').textContent=planejados; $('kpiConferidos').textContent=conferidos; $('kpiPendentes').textContent=pendentes; $('kpiDivergentes').textContent=divergentes; $('kpiValor').textContent=brl(valor);
+  // Valores financeiros consideram somente mapas efetivamente conferidos e divergentes.
+  // Mapas sem conferência não entram como falta financeira.
+  const comparados=arr.filter(r=>r.status==='DIVERGENTE');
+  const valorPositivo=comparados.reduce((s,r)=>s+valorPositivoDoMapa(r),0);
+  const valorNegativo=comparados.reduce((s,r)=>s+valorNegativoDoMapa(r),0);
+  $('kpiPlanejados').textContent=planejados; $('kpiConferidos').textContent=conferidos; $('kpiPendentes').textContent=pendentes; $('kpiDivergentes').textContent=divergentes; $('kpiValorPositivo').textContent=brl(valorPositivo); $('kpiValorNegativo').textContent=brl(valorNegativo);
   $('tbodyDashboard').innerHTML=arr.length?arr.map((r,i)=>{
     const st=statusInfo(r.status); const equipe=[r.motorista,r.ajudante1,r.ajudante2].filter(Boolean).join(' • ')||'—';
-    return `<tr><td><strong>${esc(r.data)} • Mapa ${esc(r.mapa)}</strong></td><td>${esc(r.cidade||'—')}</td><td>${esc(equipe)}</td><td>${esc(r.conferente||'—')}</td><td><span class="status ${st.cls}">${st.label}</span></td><td>${r.quantidadeDivergente||0}</td><td class="${r.valorDivergencia?'money-bad':''}">${brl(r.valorDivergencia)}</td><td><button class="btn-mini" onclick="abrirDetalheDashboard(${i})">Detalhar</button></td></tr>`;
-  }).join(''):`<tr><td colspan="8" class="empty-row">Nenhum mapa encontrado para o filtro.</td></tr>`;
+    return `<tr><td><strong>${esc(r.data)} • Mapa ${esc(r.mapa)}</strong></td><td>${esc(r.cidade||'—')}</td><td>${esc(equipe)}</td><td>${esc(r.conferente||'—')}</td><td><span class="status ${st.cls}">${st.label}</span></td><td>${r.quantidadeDivergente||0}</td><td><button class="btn-mini" onclick="abrirDetalheDashboard(${i})">Detalhar</button></td></tr>`;
+  }).join(''):`<tr><td colspan="7" class="empty-row">Nenhum mapa encontrado para o filtro.</td></tr>`;
   renderRankingMotoristas(arr);
   // Mantém índice visual para o modal mesmo com filtro.
   window.__dashAtual=arr;
 }
+function valorPositivoDoMapa(r){
+  if(Number.isFinite(Number(r.valorDivergenciaPositiva))) return Number(r.valorDivergenciaPositiva || 0);
+  return Object.values(r.detalhes || {}).reduce((s,d)=>s+(Number(d.diferenca)>0?Number(d.valor||0):0),0);
+}
+function valorNegativoDoMapa(r){
+  if(Number.isFinite(Number(r.valorDivergenciaNegativa))) return Number(r.valorDivergenciaNegativa || 0);
+  return Object.values(r.detalhes || {}).reduce((s,d)=>s+(Number(d.diferenca)<0?Number(d.valor||0):0),0);
+}
 function renderRankingMotoristas(arr){
-  // O valor financeiro dos rankings considera somente faltas (divergências negativas).
-  // A quantidade de mapas continua considerando qualquer mapa com status DIVERGENTE.
-  const valorNegativoDoMapa = r => {
-    if(Number.isFinite(Number(r.valorDivergenciaNegativa))) return Number(r.valorDivergenciaNegativa || 0);
-    return Object.values(r.detalhes || {}).reduce((s,d)=>s+(Number(d.diferenca)<0?Number(d.valor||0):0),0);
-  };
-
   const motoristas = new Map();
   const ajudantes = new Map();
 
@@ -241,17 +246,18 @@ function renderRankingMotoristas(arr){
     nome=String(nome||'').trim();
     if(!nome) return;
     const chave=nome.toLocaleLowerCase('pt-BR');
-    if(!grupos.has(chave)) grupos.set(chave,{nome,mapas:new Set(),valor:0});
+    if(!grupos.has(chave)) grupos.set(chave,{nome,mapas:new Set(),valorPositivo:0,valorNegativo:0});
     const g=grupos.get(chave);
     g.mapas.add(`${r.data}|${r.mapa}`);
-    g.valor += valorNegativoDoMapa(r);
+    g.valorPositivo += valorPositivoDoMapa(r);
+    g.valorNegativo += valorNegativoDoMapa(r);
   };
 
   arr.filter(r=>r.status==='DIVERGENTE').forEach(r=>{
     acumular(motoristas,r.motorista,r);
 
-    // Um mesmo ajudante é agrupado independentemente de ter sido Ajudante 1 ou Ajudante 2.
-    // Se por erro o mesmo nome estiver nas duas posições do mesmo mapa, contabiliza apenas uma vez.
+    // Consolida a mesma pessoa independentemente de estar como Ajudante 1 ou Ajudante 2.
+    // Se o mesmo nome estiver nas duas posições do mesmo mapa, contabiliza apenas uma vez.
     const nomesAjudantes=[r.ajudante1,r.ajudante2]
       .map(v=>String(v||'').trim())
       .filter(Boolean);
@@ -261,19 +267,19 @@ function renderRankingMotoristas(arr){
   });
 
   const preparar = grupos => [...grupos.values()]
-    .map(g=>({nome:g.nome,mapas:g.mapas.size,valor:g.valor}))
-    .sort((a,b)=>b.valor-a.valor||b.mapas-a.mapas||a.nome.localeCompare(b.nome,'pt-BR'));
+    .map(g=>({nome:g.nome,mapas:g.mapas.size,valorPositivo:g.valorPositivo,valorNegativo:g.valorNegativo}))
+    .sort((a,b)=>b.valorNegativo-a.valorNegativo||b.valorPositivo-a.valorPositivo||b.mapas-a.mapas||a.nome.localeCompare(b.nome,'pt-BR'));
 
   const rankingMotoristas=preparar(motoristas);
   const rankingAjudantes=preparar(ajudantes);
-  const linha=(r,i)=>`<tr><td><span class="rank-pos">${i+1}</span></td><td><strong>${esc(r.nome)}</strong></td><td>${r.mapas}</td><td class="ranking-money">${brl(r.valor)}</td></tr>`;
+  const linha=(r,i)=>`<tr><td><span class="rank-pos">${i+1}</span></td><td><strong>${esc(r.nome)}</strong></td><td>${r.mapas}</td><td class="ranking-money-positive">${brl(r.valorPositivo)}</td><td class="ranking-money-negative">${brl(r.valorNegativo)}</td></tr>`;
 
   $('tbodyRankingValor').innerHTML=rankingMotoristas.length
     ?rankingMotoristas.map(linha).join('')
-    :`<tr><td colspan="4" class="empty-row">Nenhum motorista com divergência no filtro.</td></tr>`;
+    :`<tr><td colspan="5" class="empty-row">Nenhum motorista com divergência no filtro.</td></tr>`;
   $('tbodyRankingMapas').innerHTML=rankingAjudantes.length
     ?rankingAjudantes.map(linha).join('')
-    :`<tr><td colspan="4" class="empty-row">Nenhum ajudante com divergência no filtro.</td></tr>`;
+    :`<tr><td colspan="5" class="empty-row">Nenhum ajudante com divergência no filtro.</td></tr>`;
 }
 function statusInfo(s){
   if(s==='OK') return {label:'SEM DIFERENÇA',cls:'ok'};
