@@ -15,6 +15,7 @@ const $ = id => document.getElementById(id);
 const isAdmin = () => usuarioAtual && usuarioAtual.perfil === 'ADMIN';
 const brl = n => Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const pad = n => String(n).padStart(2,'0');
+const horaHms = v => { const s=String(v||'').trim(); if(!s) return '—'; const m=s.match(/(?:^|\s)(\d{1,2}):(\d{2}):(\d{2})(?:\s|$)/); if(m) return `${pad(m[1])}:${m[2]}:${m[3]}`; const d=new Date(s); return Number.isNaN(d.getTime())?s:`${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`; };
 
 window.addEventListener('DOMContentLoaded', iniciar);
 
@@ -177,7 +178,7 @@ async function carregarMinhas(forcar=false){
 function renderMinhas(){
   const mapa=$('filtroMinhasMapa').value.trim().toLowerCase(); const data=isoParaBr($('filtroMinhasData').value);
   const arr=minhas.filter(r=>(!mapa||String(r.mapa).toLowerCase().includes(mapa))&&(!data||r.data===data));
-  $('tbodyMinhas').innerHTML=arr.length?arr.map(r=>`<tr><td><strong>${esc(r.data)}</strong><br><small>${esc(r.hora)}</small></td><td><strong>${esc(r.mapa)}</strong></td><td>${r.g300}</td><td>${r.g600v}</td><td>${r.g600m}</td><td>${r.glitrao}</td><td>${r.b30}</td><td>${r.b50}</td></tr>`).join(''):`<tr><td colspan="8" class="empty-row">Nenhuma conferência encontrada.</td></tr>`;
+  $('tbodyMinhas').innerHTML=arr.length?arr.map(r=>`<tr><td><strong>${esc(r.data)}</strong><br><small>${esc(horaHms(r.hora))}</small></td><td><strong>${esc(r.mapa)}</strong></td><td>${r.g300}</td><td>${r.g600v}</td><td>${r.g600m}</td><td>${r.glitrao}</td><td>${r.b30}</td><td>${r.b50}</td></tr>`).join(''):`<tr><td colspan="8" class="empty-row">Nenhuma conferência encontrada.</td></tr>`;
 }
 
 async function carregarHistorico(){
@@ -191,12 +192,12 @@ function historicoFiltrado(){
   });
 }
 function renderHistorico(){
-  const arr=historicoFiltrado(); $('tbodyHistorico').innerHTML=arr.length?arr.map(r=>`<tr><td>${esc(r.data)}</td><td>${esc(r.hora)}</td><td><strong>${esc(r.conferente)}</strong><small>${esc(r.usuario)}</small></td><td><strong>${esc(r.mapa)}</strong></td><td>${esc(r.cidade||'—')}</td><td>${esc(r.motorista||'—')}</td><td>${esc(r.ajudante1||'—')}</td><td>${esc(r.ajudante2||'—')}</td><td>${r.g300}</td><td>${r.g600v}</td><td>${r.g600m}</td><td>${r.glitrao}</td><td>${r.b30}</td><td>${r.b50}</td></tr>`).join(''):`<tr><td colspan="14" class="empty-row">Nenhum registro encontrado.</td></tr>`;
+  const arr=historicoFiltrado(); $('tbodyHistorico').innerHTML=arr.length?arr.map(r=>`<tr><td>${esc(r.data)}</td><td>${esc(horaHms(r.hora))}</td><td><strong>${esc(r.conferente||r.usuario||'—')}</strong></td><td><strong>${esc(r.mapa)}</strong></td><td>${esc(r.cidade||'—')}</td><td>${esc(r.motorista||'—')}</td><td>${esc(r.ajudante1||'—')}</td><td>${esc(r.ajudante2||'—')}</td><td>${r.g300}</td><td>${r.g600v}</td><td>${r.g600m}</td><td>${r.glitrao}</td><td>${r.b30}</td><td>${r.b50}</td></tr>`).join(''):`<tr><td colspan="14" class="empty-row">Nenhum registro encontrado.</td></tr>`;
 }
 function baixarHistoricoCsv(){
   const arr=historicoFiltrado(); if(!arr.length) return toast('Não há registros para baixar.','erro');
   const head=['Data','Hora','Conferente Usuário','Conferente Nome','Mapa','Cidade','Motorista','Ajudante 1','Ajudante 2','Garrafeiras de 300ml','Garrafeiras de 600ml Verde','Garrafeiras de 600ml Marrom','Garrafeiras de Litrão','Barris de Chopp 30L','Barris de Chopp 50L'];
-  const rows=arr.map(r=>[r.data,r.hora,r.usuario,r.conferente,r.mapa,r.cidade||'',r.motorista||'',r.ajudante1||'',r.ajudante2||'',r.g300,r.g600v,r.g600m,r.glitrao,r.b30,r.b50]);
+  const rows=arr.map(r=>[r.data,horaHms(r.hora),r.usuario,r.conferente,r.mapa,r.cidade||'',r.motorista||'',r.ajudante1||'',r.ajudante2||'',r.g300,r.g600v,r.g600m,r.glitrao,r.b30,r.b50]);
   const csv='\ufeff'+[head,...rows].map(row=>row.map(csvVal).join(';')).join('\r\n');
   baixarBlob(csv,'historico_conferencias_'+dataHojeIso()+'.csv','text/csv;charset=utf-8;');
 }
@@ -221,8 +222,26 @@ function renderDashboard(){
     const st=statusInfo(r.status); const equipe=[r.motorista,r.ajudante1,r.ajudante2].filter(Boolean).join(' • ')||'—';
     return `<tr><td><strong>${esc(r.data)} • Mapa ${esc(r.mapa)}</strong></td><td>${esc(r.cidade||'—')}</td><td>${esc(equipe)}</td><td>${esc(r.conferente||'—')}</td><td><span class="status ${st.cls}">${st.label}</span></td><td>${r.quantidadeDivergente||0}</td><td class="${r.valorDivergencia?'money-bad':''}">${brl(r.valorDivergencia)}</td><td><button class="btn-mini" onclick="abrirDetalheDashboard(${i})">Detalhar</button></td></tr>`;
   }).join(''):`<tr><td colspan="8" class="empty-row">Nenhum mapa encontrado para o filtro.</td></tr>`;
+  renderRankingMotoristas(arr);
   // Mantém índice visual para o modal mesmo com filtro.
   window.__dashAtual=arr;
+}
+function renderRankingMotoristas(arr){
+  const grupos=new Map();
+  arr.filter(r=>r.status==='DIVERGENTE' && String(r.motorista||'').trim()).forEach(r=>{
+    const nome=String(r.motorista||'').trim();
+    const chave=nome.toLocaleLowerCase('pt-BR');
+    if(!grupos.has(chave)) grupos.set(chave,{motorista:nome,mapas:new Set(),valor:0});
+    const g=grupos.get(chave);
+    g.mapas.add(`${r.data}|${r.mapa}`);
+    g.valor+=Number(r.valorDivergencia||0);
+  });
+  const base=[...grupos.values()].map(g=>({motorista:g.motorista,mapas:g.mapas.size,valor:g.valor}));
+  const porValor=[...base].sort((a,b)=>b.valor-a.valor||b.mapas-a.mapas||a.motorista.localeCompare(b.motorista,'pt-BR'));
+  const porMapas=[...base].sort((a,b)=>b.mapas-a.mapas||b.valor-a.valor||a.motorista.localeCompare(b.motorista,'pt-BR'));
+  const linha=(r,i)=>`<tr><td><span class="rank-pos">${i+1}</span></td><td><strong>${esc(r.motorista)}</strong></td><td>${r.mapas}</td><td class="ranking-money">${brl(r.valor)}</td></tr>`;
+  $('tbodyRankingValor').innerHTML=porValor.length?porValor.map(linha).join(''):`<tr><td colspan="4" class="empty-row">Nenhum motorista com divergência no filtro.</td></tr>`;
+  $('tbodyRankingMapas').innerHTML=porMapas.length?porMapas.map(linha).join(''):`<tr><td colspan="4" class="empty-row">Nenhum motorista com divergência no filtro.</td></tr>`;
 }
 function statusInfo(s){
   if(s==='OK') return {label:'SEM DIFERENÇA',cls:'ok'};
@@ -234,8 +253,11 @@ window.abrirDetalheDashboard=function(i){
   const r=(window.__dashAtual||[])[i]; if(!r) return;
   $('modalTitulo').textContent=`Mapa ${r.mapa}`; $('modalSubtitulo').textContent=`${r.data} • ${r.cidade||'Cidade não informada'}`;
   const tipos=[['g300','Garrafeiras 300ml'],['g600v','600ml Verde'],['g600m','600ml Marrom'],['glitrao','Garrafeiras de Litrão'],['b30','Barris de Chopp 30L'],['b50','Barris de Chopp 50L']];
-  const rows=tipos.map(([k,label])=>{const d=r.detalhes[k];const cls=d.diferenca<0?'negative':d.diferenca>0?'positive':'zero';const dif=d.diferenca>0?'+'+d.diferenca:String(d.diferenca);return `<div class="compare-row"><div>${label}</div><div>${d.esperado}</div><div>${d.conferido}</div><div class="${cls}">${dif}</div><div class="${d.valor?'negative':'zero'}">${brl(d.valor)}</div></div>`}).join('');
-  $('modalConteudo').innerHTML=`<div class="detail-header"><div><span>Motorista</span><strong>${esc(r.motorista||'—')}</strong></div><div><span>Ajudante 1</span><strong>${esc(r.ajudante1||'—')}</strong></div><div><span>Ajudante 2</span><strong>${esc(r.ajudante2||'—')}</strong></div><div><span>Conferente</span><strong>${esc(r.conferente||'—')}</strong></div></div><div class="compare-grid"><div class="compare-row head"><div>Vasilhame</div><div>Planilha</div><div>Conferido</div><div>Diferença</div><div>Valor</div></div>${rows}</div><div style="margin-top:16px;text-align:right;font-weight:900">Valor total da divergência: <span class="money-bad">${brl(r.valorDivergencia)}</span></div>`;
+  const rows=tipos.map(([k,label])=>{const d=r.detalhes[k];const cls=d.diferenca<0?'negative':d.diferenca>0?'positive':'zero';const dif=d.diferenca>0?'+'+d.diferenca:String(d.diferenca);return `<div class="compare-row"><div>${label}</div><div>${d.esperado}</div><div>${d.conferido}</div><div class="${cls}">${dif}</div><div class="${cls}">${brl(d.valor)}</div></div>`}).join('');
+  const detalhes=Object.values(r.detalhes||{});
+  const valorPositivo=Number(r.valorDivergenciaPositiva ?? detalhes.reduce((s,d)=>s+(Number(d.diferenca)>0?Number(d.valor||0):0),0));
+  const valorNegativo=Number(r.valorDivergenciaNegativa ?? detalhes.reduce((s,d)=>s+(Number(d.diferenca)<0?Number(d.valor||0):0),0));
+  $('modalConteudo').innerHTML=`<div class="detail-header"><div><span>Motorista</span><strong>${esc(r.motorista||'—')}</strong></div><div><span>Ajudante 1</span><strong>${esc(r.ajudante1||'—')}</strong></div><div><span>Ajudante 2</span><strong>${esc(r.ajudante2||'—')}</strong></div><div><span>Conferente</span><strong>${esc(r.conferente||'—')}</strong></div></div><div class="compare-grid"><div class="compare-row head"><div>Vasilhame</div><div>Planilha</div><div>Conferido</div><div>Diferença</div><div>Valor</div></div>${rows}</div><div class="detail-totals"><div class="detail-total positive-total"><span>Valor total em divergências positivas</span><strong>${brl(valorPositivo)}</strong><small>quantidades conferidas acima da planilha</small></div><div class="detail-total negative-total"><span>Valor total em divergências negativas</span><strong>${brl(valorNegativo)}</strong><small>quantidades conferidas abaixo da planilha</small></div></div>`;
   $('modalDetalhe').classList.add('aberto');
 }
 function fecharModal(){$('modalDetalhe').classList.remove('aberto');}
