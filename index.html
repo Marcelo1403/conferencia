@@ -128,6 +128,18 @@
           <div class="legend"><span><i class="ok"></i> Sem diferença</span><span><i class="bad"></i> Divergente</span><span><i class="wait"></i> Sem conferência</span><span><i class="info"></i> Mapa fora da base</span></div>
           <div class="table-wrap"><table class="dash-table"><thead><tr><th>Data / mapa</th><th>Cidade</th><th>Equipe</th><th>Conferente</th><th>Status</th><th>Itens divergentes</th><th>Valor diferença</th><th>Ações</th></tr></thead><tbody id="tbodyDashboard"></tbody></table></div>
         </div>
+        <div class="rankings-grid">
+          <div class="card ranking-card">
+            <div class="section-title">Ranking de motoristas por valor divergente</div>
+            <p class="ranking-help">Soma do valor absoluto das divergências dos mapas filtrados.</p>
+            <div class="table-wrap ranking-table-wrap"><table><thead><tr><th>#</th><th>Motorista</th><th>Mapas divergentes</th><th>Valor</th></tr></thead><tbody id="tbodyRankingValor"></tbody></table></div>
+          </div>
+          <div class="card ranking-card">
+            <div class="section-title">Ranking de motoristas por mapas com divergência</div>
+            <p class="ranking-help">Quantidade de mapas divergentes no período/filtro selecionado.</p>
+            <div class="table-wrap ranking-table-wrap"><table><thead><tr><th>#</th><th>Motorista</th><th>Mapas divergentes</th><th>Valor</th></tr></thead><tbody id="tbodyRankingMapas"></tbody></table></div>
+          </div>
+        </div>
       </section>
 
       <section id="view-usuarios" class="view">
@@ -142,6 +154,6 @@
 
   <div id="modalDetalhe" class="modal"><div class="modal-box large"><div class="modal-head"><div><strong id="modalTitulo">Detalhe do mapa</strong><span id="modalSubtitulo">—</span></div><button id="btnFecharModal" class="icon-btn">×</button></div><div id="modalConteudo" class="modal-body"></div></div></div>
   <div id="toast" class="toast"></div>
-  <script src="script.js?v=1.1.20260912"></script>
+  <script src="script.js?v=1.2.20260912"></script>
 </body>
 </html>
